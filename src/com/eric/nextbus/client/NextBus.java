@@ -1,5 +1,7 @@
 package com.eric.nextbus.client;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import com.eric.nextbus.shared.FieldVerifier;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -8,6 +10,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -35,17 +39,20 @@ public class NextBus implements EntryPoint {
 	 */
 	private final GreetingServiceAsync greetingService = GWT
 			.create(GreetingService.class);
+	
+	public AsyncCallback<String> nextBusService;
 
 	/**
 	 * This is the entry point method.
 	 */
 	public void onModuleLoad() {
-		final Button sendButton = new Button("Send");
+		final Button sendButton = new Button("Query");
 		final TextBox nameField = new TextBox();
+		nameField.getElement().setAttribute("placeholder", "Enter Bus Stop Number");
 		String busNo = Window.Location.getParameter("busno");
-		System.out.println(busNo);
-		nameField.setText(busNo);
+
 		final Label errorLabel = new Label();
+		final HTML nextBusLabel = new HTML();
 
 		// We can add style names to widgets
 		sendButton.addStyleName("sendButton");
@@ -55,6 +62,7 @@ public class NextBus implements EntryPoint {
 		RootPanel.get("nameFieldContainer").add(nameField);
 		RootPanel.get("sendButtonContainer").add(sendButton);
 		RootPanel.get("errorLabelContainer").add(errorLabel);
+		RootPanel.get("nextBusLabelContainer").add(nextBusLabel);
 
 		// Focus the cursor on the name field when the app loads
 		nameField.setFocus(true);
@@ -109,12 +117,13 @@ public class NextBus implements EntryPoint {
 			/**
 			 * Send the name from the nameField to the server and wait for a response.
 			 */
-			private void sendNameToServer() {
+			protected void sendNameToServer() {
 				// First, we validate the input.
 				errorLabel.setText("");
+				nextBusLabel.setText("");
 				String textToServer = nameField.getText();
-				if (!FieldVerifier.isValidName(textToServer)) {
-					errorLabel.setText("Please enter at least four characters");
+				if (!FieldVerifier.isValidBusNo(textToServer)) {
+					errorLabel.setText("Please enter 5 digit bus stop number");
 					return;
 				}
 
@@ -122,29 +131,40 @@ public class NextBus implements EntryPoint {
 				sendButton.setEnabled(false);
 				textToServerLabel.setText(textToServer);
 				serverResponseLabel.setText("");
-				greetingService.greetServer(textToServer,
-						new AsyncCallback<String>() {
-							public void onFailure(Throwable caught) {
-								// Show the RPC error message to the user
-								dialogBox
-										.setText("Remote Procedure Call - Failure");
-								serverResponseLabel
-										.addStyleName("serverResponseLabelError");
-								serverResponseLabel.setHTML(SERVER_ERROR);
-								dialogBox.center();
-								closeButton.setFocus(true);
-							}
-
-							public void onSuccess(String result) {
-								dialogBox.setText("Remote Procedure Call");
-								serverResponseLabel
-										.removeStyleName("serverResponseLabelError");
-								serverResponseLabel.setHTML(result);
-								dialogBox.center();
-								closeButton.setFocus(true);
-							}
-						});
+				greetingService.greetServer(textToServer, nextBusService);
 			}
+		}
+		nextBusService = new AsyncCallback<String>(){
+			public void onFailure(Throwable caught) {
+				// Show the RPC error message to the user
+				dialogBox
+						.setText("Remote Procedure Call - Failure");
+				serverResponseLabel
+						.addStyleName("serverResponseLabelError");
+				serverResponseLabel.setHTML(SERVER_ERROR);
+				dialogBox.center();
+				closeButton.setFocus(true);
+				sendButton.setEnabled(true);
+			}
+
+			public void onSuccess(String result) {
+//				dialogBox.setText("Remote Procedure Call");
+//				serverResponseLabel
+//						.removeStyleName("serverResponseLabelError");
+//				serverResponseLabel.setHTML(result);
+//				dialogBox.center();
+//				closeButton.setFocus(true);
+//				System.out.println(result);
+//				String resultHTML = StringEscapeUtils.escapeHtml4(result);
+				nextBusLabel.setHTML(result);
+				sendButton.setEnabled(true);
+			}
+		};
+		
+		if(busNo != null && FieldVerifier.tryParseInt(busNo))
+		{
+			nameField.setText(busNo);
+			greetingService.greetServer(busNo, nextBusService);
 		}
 
 		// Add a handler to send the name to the server
