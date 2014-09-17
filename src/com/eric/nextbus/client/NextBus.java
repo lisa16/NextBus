@@ -159,7 +159,6 @@ public class NextBus implements EntryPoint {
 				nextBusLabel.setHTML(result);
 				sendButton.setEnabled(true);
 			}
-			//test
 		};
 		
 		if(busNo != null && FieldVerifier.tryParseInt(busNo))
