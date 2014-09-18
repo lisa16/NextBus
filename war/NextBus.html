@@ -12,11 +12,12 @@
     <!-- Consider inlining CSS to reduce the number of requested files -->
     <!--                                                               -->
     <link type="text/css" rel="stylesheet" href="NextBus.css">
+    <link type="text/css" rel="stylesheet" href="css/bootstrap.css">
 
     <!--                                           -->
     <!-- Any title is fine                         -->
     <!--                                           -->
-    <title>Web Application Starter Project</title>
+    <title>Next Bus</title>
     
     <!--                                           -->
     <!-- This script loads your compiled module.   -->
@@ -24,6 +25,7 @@
     <!-- be added before this line.                -->
     <!--                                           -->
     <script type="text/javascript" language="javascript" src="nextbus/nextbus.nocache.js"></script>
+    <script type="text/javascript" language="javascript" src="js/bootstrap.js"></script>
   </head>
 
   <!--                                           -->
@@ -44,9 +46,24 @@
       </div>
     </noscript>
 
-    <h1>Web Application Starter Project</h1>
+<!--     <h1>Next Bus</h1> -->
 
-    <table align="center">
+
+<!-- <button type="button" class="btn btn-lg btn-primary">099</button>
+<button type="button" class="btn btn-lg btn-primary">041</button>
+<button type="button" class="btn btn-lg btn-primary">009</button>
+<button type="button" class="btn btn-lg btn-primary">011</button>
+<button type="button" class="btn btn-lg btn-primary">084</button>
+ -->
+<table align="center">
+      <tr>
+        <td colspan="2" style="color:red;" id="errorLabelContainer"></td>
+      </tr>
+      <tr>
+        <td colspan="2" id="nextBusLabelContainer"></td>
+      </tr>
+</table>
+<!--     <table align="center">
       <tr>
         <td colspan="2" style="font-weight:bold;">Please enter 5 digit bus stop number:</td>        
       </tr>
@@ -60,6 +77,6 @@
       <tr>
         <td colspan="2" id="nextBusLabelContainer"></td>
       </tr>
-    </table>
+    </table> -->
   </body>
 </html>

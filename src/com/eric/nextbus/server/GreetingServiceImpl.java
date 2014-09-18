@@ -5,8 +5,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.eric.nextbus.client.GreetingService;
+import com.eric.nextbus.shared.BusData;
 import com.eric.nextbus.shared.FieldVerifier;
 import com.google.appengine.labs.repackaged.org.json.JSONArray;
 import com.google.appengine.labs.repackaged.org.json.JSONException;
@@ -20,9 +23,9 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class GreetingServiceImpl extends RemoteServiceServlet implements
 		GreetingService {
 
-	public String greetServer(String input) throws IllegalArgumentException {
+	public List<BusData> greetServer(String busStopNo) throws IllegalArgumentException {
 		// Verify that the input is valid. 
-		if (!FieldVerifier.isValidBusNo(input)) {
+		if (!FieldVerifier.isValidBusNo(busStopNo)) {
 			// If the input is not valid, throw an IllegalArgumentException back to
 			// the client.
 			throw new IllegalArgumentException(
@@ -33,16 +36,18 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 //		String userAgent = getThreadLocalRequest().getHeader("User-Agent");
 
 		// Escape data from the client to avoid cross-site script vulnerabilities.
-		input = escapeHtml(input);
+		busStopNo = escapeHtml(busStopNo);
 //		userAgent = escapeHtml(userAgent);
 		
 //		String queryLink = "http://api.translink.ca/rttiapi/v1/stops/"
 //				+ input
 //				+ "/estimates?apikey=YWxAZPnYPOJsiX0wFG3l";
 		
+		ArrayList<BusData> busDataList = new ArrayList<BusData>();
+		
 		StringBuilder uriBuilder = new StringBuilder(
 				"//api.translink.ca/rttiapi/v1/stops/");
-		uriBuilder.append(input);
+		uriBuilder.append(busStopNo);
 		uriBuilder.append("/estimates?apikey=YWxAZPnYPOJsiX0wFG3l");
 
 		String busStopJsonQuery = makeJSONQuery(uriBuilder);
@@ -54,16 +59,38 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 
 			for(int i=0; i< arr.length(); i++)
 			{
+				
 				JSONObject obj = arr.getJSONObject(i);
-				String routeName = obj.getString("RouteNo");
-				result += "RouteNo: " + routeName + "<br>\n";
+				String routeNum = obj.getString("RouteNo");
+				result += "RouteNo: " + routeNum + "<br>\n";
 				//			BusRoute route = new BusRoute(routeName);
 				JSONArray schedules = obj.getJSONArray("Schedules");
 //				int[] estimatesArray = new int[schedules.length()];
+				
+				BusData busData = new BusData(Integer.parseInt(busStopNo), Integer.parseInt(routeNum));
+				busDataList.add(busData);
 				for (int s=0; s< schedules.length(); s++) 
 				{
 					JSONObject jobj = schedules.getJSONObject(s);
 					int estimate = jobj.getInt("ExpectedCountdown");
+					String scheduleStatus = jobj.getString("ScheduleStatus");
+					if(scheduleStatus.equals("*"))
+					{
+						busData.AddEstimate(estimate, BusData.Status.ONTIME);
+					}
+					else if(scheduleStatus.equals("-"))
+					{
+						busData.AddEstimate(estimate, BusData.Status.DELAYED);
+					}
+					else if(scheduleStatus.equals("+"))
+					{
+						busData.AddEstimate(estimate, BusData.Status.AHEAD);
+					}
+					else
+					{
+						busData.AddEstimate(estimate, BusData.Status.NONE);
+					}
+					
 //					estimatesArray[s] = estimate;
 					
 					result += "(" + s + "): " + estimate + "mins ";
@@ -80,8 +107,8 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 			// TODO Auto-generated catch block
 			//e.printStackTrace();
 		}
-		
-		return result;
+		return busDataList;
+//		return result;
 		
 //		return "Hello, " + input + "!<br><br>I am running " + serverInfo
 //				+ ".<br><br>It looks like you are using:<br>" + userAgent;
