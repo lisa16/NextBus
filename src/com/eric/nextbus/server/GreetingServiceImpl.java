@@ -48,10 +48,10 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 		StringBuilder uriBuilder = new StringBuilder(
 				"//api.translink.ca/rttiapi/v1/stops/");
 		uriBuilder.append(busStopNo);
-		uriBuilder.append("/estimates?apikey=YWxAZPnYPOJsiX0wFG3l");
+		uriBuilder.append("/estimates?timeframe=1440&apikey=YWxAZPnYPOJsiX0wFG3l");
 
 		String busStopJsonQuery = makeJSONQuery(uriBuilder);
-		
+		System.out.println(busStopJsonQuery);
 		String result = "";
 		try 
 		{
@@ -67,7 +67,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 				JSONArray schedules = obj.getJSONArray("Schedules");
 //				int[] estimatesArray = new int[schedules.length()];
 				
-				BusData busData = new BusData(Integer.parseInt(busStopNo), Integer.parseInt(routeNum));
+				BusData busData = new BusData(Integer.parseInt(busStopNo), routeNum);
 				busDataList.add(busData);
 				for (int s=0; s< schedules.length(); s++) 
 				{

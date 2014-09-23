@@ -52,9 +52,12 @@ public class NextBus implements EntryPoint {
 //		nameField.getElement().setAttribute("placeholder", "Enter Bus Stop Number");
 		_stopNo = Window.Location.getParameter("stopnum");
 
-		final Label errorLabel = new Label();
-		final HTML nextBusLabel = new HTML();
-
+//		final Label errorLabel = new Label();
+//		final HTML nextBusLabel = new HTML();
+		final HTML busRouteNumField = new HTML();
+		final HTML busStopNumField = new HTML();
+		final HTML busEstimatesField = new HTML();
+		
 		// We can add style names to widgets
 //		sendButton.addStyleName("sendButton");
 
@@ -62,8 +65,42 @@ public class NextBus implements EntryPoint {
 		// Use RootPanel.get() to get the entire body element
 //		RootPanel.get("nameFieldContainer").add(nameField);
 //		RootPanel.get("sendButtonContainer").add(sendButton);
-		RootPanel.get("errorLabelContainer").add(errorLabel);
-		RootPanel.get("nextBusLabelContainer").add(nextBusLabel);
+//		RootPanel.get("errorLabelContainer").add(errorLabel);
+//		RootPanel.get("nextBusLabelContainer").add(nextBusLabel);
+		RootPanel.get("busRouteNumField").add(busRouteNumField);
+		RootPanel.get("busStopNumField").add(busStopNumField);
+		RootPanel.get("busEstimatesField").add(busEstimatesField);
+		
+/*		busRouteNumField.setHTML("<div class=\"row\">\r\n" + 
+				"				<button type=\"button\" class=\"btn btn-lg btn-primary active\">099</button>\r\n" + 
+				"				<button type=\"button\" class=\"btn btn-lg btn-primary\">041</button>\r\n" + 
+				"				<button type=\"button\" class=\"btn btn-lg btn-primary\">009</button>\r\n" + 
+				"				<button type=\"button\" class=\"btn btn-lg btn-primary\">049</button>\r\n" + 
+				"				<button type=\"button\" class=\"btn btn-lg btn-primary\">084</button>\r\n" + 
+				"			</div>");*/
+		
+/*		busStopNumField.setHTML("<h3>Bus Stop Num: 59270</h3>");*/
+		
+		/*busEstimatesField.setHTML("<table class=\"table table-striped\">\r\n" + 
+				"				<thead>\r\n" + 
+				"					<th>Estimates</th>\r\n" + 
+				"					<th>Status</th>\r\n" + 
+				"				</thead>\r\n" + 
+				"				<tbody>\r\n" + 
+				"					<tr>\r\n" + 
+				"						<td>0 min</td>\r\n" + 
+				"						<td>On Time</td>\r\n" + 
+				"					</tr>\r\n" + 
+				"					<tr>\r\n" + 
+				"						<td>5 min</td>\r\n" + 
+				"						<td>Delayed</td>\r\n" + 
+				"					</tr>\r\n" + 
+				"					<tr>\r\n" + 
+				"						<td>10 min</td>\r\n" + 
+				"						<td>Ahead</td>\r\n" + 
+				"					</tr>\r\n" + 
+				"				</tbody>\r\n" + 
+				"			</table>");*/
 
 		// Focus the cursor on the name field when the app loads
 //		nameField.setFocus(true);
@@ -120,11 +157,11 @@ public class NextBus implements EntryPoint {
 			 */
 			protected void sendNameToServer() {
 				// First, we validate the input.
-				errorLabel.setText("");
-				nextBusLabel.setText("");
+//				errorLabel.setText("");
+//				nextBusLabel.setText("");
 //				String textToServer = nameField.getText();
 				if (!FieldVerifier.isValidBusNo(_stopNo)) {
-					errorLabel.setText("Please enter 5 digit bus stop number");
+//					errorLabel.setText("Please enter 5 digit bus stop number");
 					return;
 				}
 
@@ -159,11 +196,17 @@ public class NextBus implements EntryPoint {
 //				String resultHTML = StringEscapeUtils.escapeHtml4(result);
 //				nextBusLabel.setHTML(result);
 				//nextBusLabel;
+				if(result.size()==0)
+				{
+					busRouteNumField.setHTML(FieldAdder.NoBusMessage());
+					return;
+				}
+
 				String content = "";
 				content += "Stop No: " + result.get(0).GetStopNum() + "<br>";
 				for(BusData busData : result)
 				{
-					int routeNo = busData.GetRouteNum();
+					String routeNo = busData.GetRouteNum();
 //					int stopNo = busData.GetStopNum();
 
 					SortedMap<Integer, BusData.Status> estimates = busData.GetEstimates();
@@ -174,14 +217,18 @@ public class NextBus implements EntryPoint {
 					for(int key : estimates.keySet())
 					{
 						BusData.Status status = estimates.get(key);
-						content += key + " : " + status.name();
+						content += key + " : " + status.toString();
 						content += "<br>";
 					}
 					
 				}
-				System.out.println(content);
-				nextBusLabel.setHTML(content);
+				System.out.println("content");
+//				nextBusLabel.setHTML(content);
 				
+				busRouteNumField.setHTML(FieldAdder.AddBusRouteNumField(result));
+				busStopNumField.setHTML(FieldAdder.AddBusStopNumField(result.get(0).GetStopNum()));
+				busEstimatesField.setHTML(FieldAdder.AddBusEstimatesField(result));
+				System.out.println("succed done");
 //				sendButton.setEnabled(true);
 			}
 		};

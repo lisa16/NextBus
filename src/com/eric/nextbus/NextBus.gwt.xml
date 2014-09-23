@@ -8,6 +8,9 @@
 <module rename-to='nextbus'>
   <!-- Inherit the core Web Toolkit stuff.                        -->
   <inherits name='com.google.gwt.user.User'/>
+  
+  <!-- Inherit so we can use NumberFormat -->
+  <inherits name="com.google.gwt.i18n.I18N"/>
 
   <!-- Inherit the default GWT style sheet.  You can change       -->
   <!-- the theme of your GWT application by uncommenting          -->

@@ -4,66 +4,108 @@
 <!-- "Standards Mode". Replacing this declaration   -->
 <!-- with a "Quirks Mode" doctype is not supported. -->
 
-<html>
-  <head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<html lang="en">
+<head>
+<meta name="viewport" http-equiv="content-type"
+	content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, charset=UTF-8">
 
-    <!--                                                               -->
-    <!-- Consider inlining CSS to reduce the number of requested files -->
-    <!--                                                               -->
-    <link type="text/css" rel="stylesheet" href="NextBus.css">
-    <link type="text/css" rel="stylesheet" href="css/bootstrap.css">
+<!--                                                               -->
+<!-- Consider inlining CSS to reduce the number of requested files -->
+<!--                                                               -->
+<!-- <link type="text/css" rel="stylesheet" href="NextBus.css"> -->
+<link type="text/css" rel="stylesheet" href="css/bootstrap.css">
 
-    <!--                                           -->
-    <!-- Any title is fine                         -->
-    <!--                                           -->
-    <title>Next Bus</title>
-    
-    <!--                                           -->
-    <!-- This script loads your compiled module.   -->
-    <!-- If you add any GWT meta tags, they must   -->
-    <!-- be added before this line.                -->
-    <!--                                           -->
-    <script type="text/javascript" language="javascript" src="nextbus/nextbus.nocache.js"></script>
-    <script type="text/javascript" language="javascript" src="js/bootstrap.js"></script>
-  </head>
+<!--                                           -->
+<!-- Any title is fine                         -->
+<!--                                           -->
+<title>Next Bus</title>
 
-  <!--                                           -->
-  <!-- The body can have arbitrary html, or      -->
-  <!-- you can leave the body empty if you want  -->
-  <!-- to create a completely dynamic UI.        -->
-  <!--                                           -->
-  <body>
+<!--                                           -->
+<!-- This script loads your compiled module.   -->
+<!-- If you add any GWT meta tags, they must   -->
+<!-- be added before this line.                -->
+<!--                                           -->
+<script type="text/javascript" language="javascript"
+	src="nextbus/nextbus.nocache.js"></script>
+<script type="text/javascript" language="javascript"
+	src="js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" language="javascript"
+	src="js/bootstrap.js"></script>
 
-    <!-- OPTIONAL: include this if you want history support -->
-    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
-    
-    <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
-    <noscript>
-      <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
-        Your web browser must have JavaScript enabled
-        in order for this application to display correctly.
-      </div>
-    </noscript>
+</head>
 
-<!--     <h1>Next Bus</h1> -->
+<!--                                           -->
+<!-- The body can have arbitrary html, or      -->
+<!-- you can leave the body empty if you want  -->
+<!-- to create a completely dynamic UI.        -->
+<!--                                           -->
+<body>
+	<div class="container-fluid">
+		<!-- OPTIONAL: include this if you want history support -->
+		<iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1'
+			style="position: absolute; width: 0; height: 0; border: 0"></iframe>
+
+		<!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+		<noscript>
+			<div
+				style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+				Your web browser must have JavaScript enabled in order for this
+				application to display correctly.</div>
+		</noscript>
+
+		<!--     <h1>Next Bus</h1> -->
+		<div id="busStopNumField">
+			<!-- <h3>Bus Stop Num: 59270</h3> -->
+		</div>
+
+		<div id="busRouteNumField">
+			<!--  Bus Route Number Field -->
 
 
-<!-- <button type="button" class="btn btn-lg btn-primary">099</button>
-<button type="button" class="btn btn-lg btn-primary">041</button>
-<button type="button" class="btn btn-lg btn-primary">009</button>
-<button type="button" class="btn btn-lg btn-primary">011</button>
-<button type="button" class="btn btn-lg btn-primary">084</button>
- -->
-<table align="center">
+
+			<!-- <div class="row">
+				<button type="button" class="btn btn-lg btn-primary active">099</button>
+				<button type="button" class="btn btn-lg btn-primary">041</button>
+				<button type="button" class="btn btn-lg btn-primary">009</button>
+				<button type="button" class="btn btn-lg btn-primary">049</button>
+				<button type="button" class="btn btn-lg btn-primary">084</button>
+			</div> -->
+
+		</div>
+
+		<div id="busEstimatesField">
+			<!-- <table class="table table-striped">
+				<thead>
+					<th>Estimates</th>
+					<th>Status</th>
+				</thead>
+				<tbody>
+					<tr>
+						<td>0 min</td>
+						<td>On Time</td>
+					</tr>
+					<tr>
+						<td>5 min</td>
+						<td>Delayed</td>
+					</tr>
+					<tr>
+						<td>10 min</td>
+						<td>Ahead</td>
+					</tr>
+				</tbody>
+			</table> -->
+		</div>
+		<button type="button" class="btn btn-info">Refresh</button>
+		<button type="button" class="btn btn-default">Contact Us</button>
+		<!-- <table align="center">
       <tr>
         <td colspan="2" style="color:red;" id="errorLabelContainer"></td>
       </tr>
       <tr>
         <td colspan="2" id="nextBusLabelContainer"></td>
       </tr>
-</table>
-<!--     <table align="center">
+</table> -->
+		<!--     <table align="center">
       <tr>
         <td colspan="2" style="font-weight:bold;">Please enter 5 digit bus stop number:</td>        
       </tr>
@@ -78,5 +120,6 @@
         <td colspan="2" id="nextBusLabelContainer"></td>
       </tr>
     </table> -->
-  </body>
+	</div>
+</body>
 </html>

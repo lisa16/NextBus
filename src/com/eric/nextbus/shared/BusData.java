@@ -11,17 +11,36 @@ public class BusData implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public enum Status {NONE, ONTIME, DELAYED, AHEAD};
+	public enum Status {
+		NONE("-"), 
+		ONTIME("On Time"), 
+		DELAYED("Delayed"), 
+		AHEAD("Ahead");
+
+		private final String name;       
+
+		private Status(String s) {
+			name = s;
+		}
+
+		public boolean equalsName(String otherName){
+			return (otherName == null)? false:name.equals(otherName);
+		}
+
+		public String toString(){
+			return name;
+		}
+	};
 	
 	private int _stopNum;
-	private int _routeNum;
+	private String _routeNum;
 	private SortedMap<Integer, Status> _estimates = new TreeMap<Integer, Status>();
 	
 	public BusData()
 	{
 	}
 	
-	public BusData(int stopNum, int routeNum)
+	public BusData(int stopNum, String routeNum)
 	{
 		_stopNum = stopNum;
 		_routeNum = routeNum;
@@ -32,7 +51,7 @@ public class BusData implements Serializable{
 		return _stopNum;
 	}
 	
-	public int GetRouteNum()
+	public String GetRouteNum()
 	{
 		return _routeNum;
 	}
