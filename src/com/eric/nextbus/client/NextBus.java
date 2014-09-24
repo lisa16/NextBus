@@ -142,6 +142,8 @@ public class NextBus implements EntryPoint {
 			public void onClick(ClickEvent event) {
 				sendNameToServer();
 			}
+			
+			
 
 			/**
 			 * Fired when the user types in the nameField.
@@ -225,7 +227,7 @@ public class NextBus implements EntryPoint {
 				System.out.println("content");
 //				nextBusLabel.setHTML(content);
 				
-				busRouteNumField.setHTML(FieldAdder.AddBusRouteNumField(result));
+				busRouteNumField.setHTML(FieldAdder.AddBusRouteNumField(result, RootPanel.get("busRouteNumField")));
 				busStopNumField.setHTML(FieldAdder.AddBusStopNumField(result.get(0).GetStopNum()));
 				busEstimatesField.setHTML(FieldAdder.AddBusEstimatesField(result));
 				System.out.println("succed done");

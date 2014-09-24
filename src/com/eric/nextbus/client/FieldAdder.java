@@ -5,6 +5,8 @@ import java.util.SortedMap;
 
 import com.eric.nextbus.shared.BusData;
 import com.eric.nextbus.shared.BusData.Status;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.RootPanel;
 
 public class FieldAdder {
 
@@ -29,7 +31,7 @@ public class FieldAdder {
 		return busStopNumFormat;
 	}
 	
-	public static String AddBusRouteNumField(List<BusData> dataList)
+	public static String AddBusRouteNumField(List<BusData> dataList, RootPanel routeNumFieldPanel)
 	{
 		String head = "<div class=\"row\">\r\n";
 		String content = "";
@@ -38,14 +40,21 @@ public class FieldAdder {
 		for(BusData data : dataList)
 		{
 			String routeNum = data.GetRouteNum();
-			content += "<button type=\"button\" class=\"btn btn-lg btn-primary\">" +
-					routeNum +
-					"</button>\r\n";
+			Button stopButton = new Button (routeNum);
+			stopButton.getElement().setClassName("btn btn-lg btn-primary");
+			
+			
+			
+			routeNumFieldPanel.add(stopButton);
+//			content += "<button type=\"button\" class=\"btn btn-lg btn-primary\">" +
+//					routeNum +
+//					"</button>\r\n";
 		}
 
 		String foot = "</div>\r\n";
 
 		return head+content+foot;
+		
 	}
 
 	public static String AddBusEstimatesField(List<BusData> dataList)
