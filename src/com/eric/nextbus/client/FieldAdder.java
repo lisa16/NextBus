@@ -6,7 +6,10 @@ import java.util.SortedMap;
 import com.eric.nextbus.shared.BusData;
 import com.eric.nextbus.shared.BusData.Status;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TextBox;
 
 public class FieldAdder {
 
@@ -17,9 +20,9 @@ public class FieldAdder {
 		return noBusMessage;
 	}
 
-	public static String AddBusStopNumField(int stopNum)
+	public static String AddBusStopNumField(int stopNum, RootPanel busStopNumFieldPanel)
 	{
-		String busStopNumFormat = "<div class=\"row\">\r\n" + 
+/*		String busStopNumFormat = "<div class=\"row\">\r\n" + 
 								  "<h3>Stop Num: " +
 								  "<input width=\"75px\" type=\"number\" placeholder=\"Stop Number\" value=\"" +
 								  stopNum + 
@@ -27,8 +30,32 @@ public class FieldAdder {
 								  "<button type=\"button\" class=\"btn btn-info\">Refresh</button>\r\n" +
 								  "</h3>\r\n" +
 								  "</div>\r\n";
+*/
 		
-		return busStopNumFormat;
+//		busStopNumFieldPanel.getElement().setClassName("row");
+		
+//		FlowPanel flowPanel = new FlowPanel();
+//		busStopNumFieldPanel.add(flowPanel);
+		
+//		flowPanel.getElement().setClassName("row");
+		
+		HTML stopNumLabel = new HTML("<h3>Stop Num: </h3>");
+		busStopNumFieldPanel.add(stopNumLabel);		
+		
+		TextBox stopNumInput = new TextBox();
+		stopNumInput.getElement().setAttribute("placeHolder","Stop Number");
+		stopNumInput.getElement().setClassName("form-control");
+		stopNumInput.getElement().setAttribute("type", "number");
+		stopNumInput.setText(stopNum + "");
+		
+		busStopNumFieldPanel.add(stopNumInput);		
+		
+		Button searchButton = new Button("Search");
+		searchButton.getElement().setClassName("btn btn-info btn-lg");
+		
+		busStopNumFieldPanel.add(searchButton);		
+		
+		return "";
 	}
 	
 	public static String AddBusRouteNumField(List<BusData> dataList, RootPanel routeNumFieldPanel)

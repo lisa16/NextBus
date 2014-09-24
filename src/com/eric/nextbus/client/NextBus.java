@@ -227,8 +227,8 @@ public class NextBus implements EntryPoint {
 				System.out.println("content");
 //				nextBusLabel.setHTML(content);
 				
-				busRouteNumField.setHTML(FieldAdder.AddBusRouteNumField(result, RootPanel.get("busRouteNumField")));
-				busStopNumField.setHTML(FieldAdder.AddBusStopNumField(result.get(0).GetStopNum()));
+				FieldAdder.AddBusRouteNumField(result, RootPanel.get("busRouteNumField"));
+				FieldAdder.AddBusStopNumField(result.get(0).GetStopNum(), RootPanel.get("busStopNumField"));
 				busEstimatesField.setHTML(FieldAdder.AddBusEstimatesField(result));
 				System.out.println("succed done");
 //				sendButton.setEnabled(true);
