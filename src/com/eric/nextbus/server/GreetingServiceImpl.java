@@ -25,7 +25,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 
 	public List<BusData> greetServer(String busStopNo) throws IllegalArgumentException {
 		// Verify that the input is valid. 
-		if (!FieldVerifier.isValidBusNo(busStopNo)) {
+		if (!FieldVerifier.isValidStopNum(busStopNo)) {
 			// If the input is not valid, throw an IllegalArgumentException back to
 			// the client.
 			throw new IllegalArgumentException(

@@ -60,6 +60,8 @@ public class FieldAdder {
 	
 	public static String AddBusRouteNumField(List<BusData> dataList, RootPanel routeNumFieldPanel)
 	{
+		routeNumFieldPanel.clear();
+		
 		String head = "<div class=\"row\">\r\n";
 		String content = "";
 

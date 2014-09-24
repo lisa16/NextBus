@@ -40,9 +40,9 @@ public class FieldVerifier {
 		return name.length() > 3;
 	}
 	
-	public static boolean isValidBusNo(String busNo)
+	public static boolean isValidStopNum(String stopNum)
 	{
-		if(!tryParseInt(busNo) || busNo.length() != 5)
+		if(!tryParseInt(stopNum) || stopNum.length() != 5)
 			return false;
 		else
 			return true;

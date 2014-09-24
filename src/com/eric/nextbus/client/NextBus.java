@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
@@ -43,6 +44,8 @@ public class NextBus implements EntryPoint {
 	
 	public AsyncCallback<List<BusData>> nextBusService;
 
+	final TextBox stopNumInput = new TextBox();
+	
 	/**
 	 * This is the entry point method.
 	 */
@@ -134,46 +137,6 @@ public class NextBus implements EntryPoint {
 			}
 		});
 
-		// Create a handler for the sendButton and nameField
-		class MyHandler implements ClickHandler, KeyUpHandler {
-			/**
-			 * Fired when the user clicks on the sendButton.
-			 */
-			public void onClick(ClickEvent event) {
-				sendNameToServer();
-			}
-			
-			
-
-			/**
-			 * Fired when the user types in the nameField.
-			 */
-			public void onKeyUp(KeyUpEvent event) {
-				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-					sendNameToServer();
-				}
-			}
-
-			/**
-			 * Send the name from the nameField to the server and wait for a response.
-			 */
-			protected void sendNameToServer() {
-				// First, we validate the input.
-//				errorLabel.setText("");
-//				nextBusLabel.setText("");
-//				String textToServer = nameField.getText();
-				if (!FieldVerifier.isValidBusNo(_stopNo)) {
-//					errorLabel.setText("Please enter 5 digit bus stop number");
-					return;
-				}
-
-				// Then, we send the input to the server.
-//				sendButton.setEnabled(false);
-//				textToServerLabel.setText(textToServer);
-				serverResponseLabel.setText("");
-				greetingService.greetServer(_stopNo, nextBusService);
-			}
-		}
 		nextBusService = new AsyncCallback<List<BusData>>(){
 			public void onFailure(Throwable caught) {
 				// Show the RPC error message to the user
@@ -203,32 +166,9 @@ public class NextBus implements EntryPoint {
 					busRouteNumField.setHTML(FieldAdder.NoBusMessage());
 					return;
 				}
-
-				String content = "";
-				content += "Stop No: " + result.get(0).GetStopNum() + "<br>";
-				for(BusData busData : result)
-				{
-					String routeNo = busData.GetRouteNum();
-//					int stopNo = busData.GetStopNum();
-
-					SortedMap<Integer, BusData.Status> estimates = busData.GetEstimates();
-					
-					content += "Route No: " + routeNo;
-					content += "<br>";
-					
-					for(int key : estimates.keySet())
-					{
-						BusData.Status status = estimates.get(key);
-						content += key + " : " + status.toString();
-						content += "<br>";
-					}
-					
-				}
-				System.out.println("content");
-//				nextBusLabel.setHTML(content);
 				
 				FieldAdder.AddBusRouteNumField(result, RootPanel.get("busRouteNumField"));
-				FieldAdder.AddBusStopNumField(result.get(0).GetStopNum(), RootPanel.get("busStopNumField"));
+				AddBusStopNumField(result.get(0).GetStopNum(), RootPanel.get("busStopNumField"));
 				busEstimatesField.setHTML(FieldAdder.AddBusEstimatesField(result));
 				System.out.println("succed done");
 //				sendButton.setEnabled(true);
@@ -245,5 +185,62 @@ public class NextBus implements EntryPoint {
 //		MyHandler handler = new MyHandler();
 //		sendButton.addClickHandler(handler);
 //		nameField.addKeyUpHandler(handler);
+	}
+	
+	private void AddBusStopNumField(int stopNum, RootPanel busStopNumFieldPanel)
+	{
+/*		String busStopNumFormat = "<div class=\"row\">\r\n" + 
+								  "<h3>Stop Num: " +
+								  "<input width=\"75px\" type=\"number\" placeholder=\"Stop Number\" value=\"" +
+								  stopNum + 
+								  "\">\r\n" +
+								  "<button type=\"button\" class=\"btn btn-info\">Refresh</button>\r\n" +
+								  "</h3>\r\n" +
+								  "</div>\r\n";
+*/
+		busStopNumFieldPanel.clear();
+		
+		final HTML stopNumLabel = new HTML("<h3>Stop Num: </h3>");
+		busStopNumFieldPanel.add(stopNumLabel);		
+
+		stopNumInput.getElement().setAttribute("placeHolder","Stop Number");
+		stopNumInput.getElement().setClassName("form-control");
+		stopNumInput.getElement().setAttribute("type", "number");
+		stopNumInput.setText(stopNum + "");
+		
+		stopNumInput.addKeyUpHandler(new BusStopNumberEventHandler());
+		
+		busStopNumFieldPanel.add(stopNumInput);		
+		
+		final Button searchButton = new Button("Search");
+		searchButton.getElement().setClassName("btn btn-info btn-lg");
+		
+		searchButton.addClickHandler(new BusStopNumberEventHandler());
+		
+		busStopNumFieldPanel.add(searchButton);		
+	}
+	
+	class BusStopNumberEventHandler implements ClickHandler, KeyUpHandler {
+
+		public void onClick(ClickEvent event) 
+		{
+			queryStopNumToServer();
+		}
+		
+		public void onKeyUp(KeyUpEvent event) {
+			if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+				queryStopNumToServer();
+			}
+		}
+		
+		protected void queryStopNumToServer()
+		{
+			String busStopNum = stopNumInput.getText();
+			if(FieldVerifier.isValidStopNum(busStopNum))
+			{
+				greetingService.greetServer(busStopNum, nextBusService);
+			}
+		}
+
 	}
 }
