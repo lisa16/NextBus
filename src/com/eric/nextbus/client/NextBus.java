@@ -1,5 +1,6 @@
 package com.eric.nextbus.client;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -24,6 +25,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -38,19 +40,21 @@ public class NextBus implements EntryPoint {
 			+ "connection and try again.";
 
 	private String _stopNo;
-	
+
 	/**
 	 * Create a remote service proxy to talk to the server-side Greeting service.
 	 */
 	private final GreetingServiceAsync greetingService = GWT
 			.create(GreetingService.class);
-	
+
 	public AsyncCallback<List<BusData>> nextBusService;
 
 	final TextBox stopNumInput = new TextBox();
-	
+
 	final Map<String, HTML> busEstimatesMap = new TreeMap<String, HTML>();
-	
+
+	final private List<Button> _busRouteNumButtons = new ArrayList<Button>();
+
 	/**
 	 * This is the entry point method.
 	 */
@@ -59,30 +63,29 @@ public class NextBus implements EntryPoint {
 
 		final HTML busRouteNumField = new HTML();
 		final HTML busStopNumField = new HTML();
-		
+
 		// We can add style names to widgets
-//		sendButton.addStyleName("sendButton");
+		//		sendButton.addStyleName("sendButton");
 
 		// Add the nameField and sendButton to the RootPanel
 		// Use RootPanel.get() to get the entire body element
-//		RootPanel.get("nameFieldContainer").add(nameField);
-//		RootPanel.get("sendButtonContainer").add(sendButton);
-//		RootPanel.get("errorLabelContainer").add(errorLabel);
-//		RootPanel.get("nextBusLabelContainer").add(nextBusLabel);
+		//		RootPanel.get("nameFieldContainer").add(nameField);
+		//		RootPanel.get("sendButtonContainer").add(sendButton);
+		//		RootPanel.get("errorLabelContainer").add(errorLabel);
+		//		RootPanel.get("nextBusLabelContainer").add(nextBusLabel);
 		RootPanel.get("busRouteNumField").add(busRouteNumField);
 		RootPanel.get("busStopNumField").add(busStopNumField);
-		final RootPanel busEstimatesFieldPanel = RootPanel.get("busEstimatesField");
-		
-/*		busRouteNumField.setHTML("<div class=\"row\">\r\n" + 
+
+		/*		busRouteNumField.setHTML("<div class=\"row\">\r\n" + 
 				"				<button type=\"button\" class=\"btn btn-lg btn-primary active\">099</button>\r\n" + 
 				"				<button type=\"button\" class=\"btn btn-lg btn-primary\">041</button>\r\n" + 
 				"				<button type=\"button\" class=\"btn btn-lg btn-primary\">009</button>\r\n" + 
 				"				<button type=\"button\" class=\"btn btn-lg btn-primary\">049</button>\r\n" + 
 				"				<button type=\"button\" class=\"btn btn-lg btn-primary\">084</button>\r\n" + 
 				"			</div>");*/
-		
-/*		busStopNumField.setHTML("<h3>Bus Stop Num: 59270</h3>");*/
-		
+
+		/*		busStopNumField.setHTML("<h3>Bus Stop Num: 59270</h3>");*/
+
 		/*busEstimatesField.setHTML("<table class=\"table table-striped\">\r\n" + 
 				"				<thead>\r\n" + 
 				"					<th>Estimates</th>\r\n" + 
@@ -105,8 +108,8 @@ public class NextBus implements EntryPoint {
 				"			</table>");*/
 
 		// Focus the cursor on the name field when the app loads
-//		nameField.setFocus(true);
-//		nameField.selectAll();
+		//		nameField.setFocus(true);
+		//		nameField.selectAll();
 
 		// Create the popup dialog box
 		final DialogBox dialogBox = new DialogBox();
@@ -138,9 +141,9 @@ public class NextBus implements EntryPoint {
 			public void onFailure(Throwable caught) {
 				// Show the RPC error message to the user
 				dialogBox
-						.setText("Remote Procedure Call - Failure");
+				.setText("Remote Procedure Call - Failure");
 				serverResponseLabel
-						.addStyleName("serverResponseLabelError");
+				.addStyleName("serverResponseLabelError");
 				serverResponseLabel.setHTML(SERVER_ERROR);
 				dialogBox.center();
 				closeButton.setFocus(true);
@@ -153,14 +156,15 @@ public class NextBus implements EntryPoint {
 					busRouteNumField.setHTML(FieldAdder.NoBusMessage());
 					return;
 				}
-				
-				FieldAdder.AddBusRouteNumField(result, RootPanel.get("busRouteNumField"));
+
+				AddBusRouteNumField(result, RootPanel.get("busRouteNumField"));
 				AddBusStopNumField(result.get(0).GetStopNum(), RootPanel.get("busStopNumField"));
 
 				InitBusEstimatesMap(result);
+
+				final RootPanel busEstimatesFieldPanel = RootPanel.get("busEstimatesField");
 				busEstimatesFieldPanel.clear();
-				busEstimatesFieldPanel.add(busEstimatesMap.get("049"));
-				
+				busEstimatesFieldPanel.add((Widget) busEstimatesMap.values().toArray()[0]);
 
 				System.out.println("succeed");
 			}
@@ -171,7 +175,7 @@ public class NextBus implements EntryPoint {
 			greetingService.greetServer(_stopNo, nextBusService);
 		}
 	}
-	
+
 	public String AddBusEstimatesField(List<BusData> dataList)
 	{
 
@@ -181,7 +185,7 @@ public class NextBus implements EntryPoint {
 				"					<th>Status</th>\r\n" + 
 				"				</thead>\r\n" + 
 				"				<tbody>\r\n";
-		
+
 		String content = "";
 		for(BusData data : dataList)
 		{
@@ -198,21 +202,21 @@ public class NextBus implements EntryPoint {
 						"</td>\r\n" + 
 						"					</tr>\r\n";
 			}
-			
+
 		}
-		
+
 		String foot = "			</tbody>\r\n" + 
 				"			</table>\r\n";
-		
+
 		return head+content+foot;
 	}
-	
+
 	private void InitBusEstimatesMap(List<BusData> dataList)
 	{
 		for(BusData data : dataList)
 		{
 			String busRouteNum = data.GetRouteNum();
-			
+
 			String head = "<table class=\"table table-striped\">\r\n" + 
 					"				<thead>\r\n" + 
 					"					<th>Estimates</th>\r\n" + 
@@ -238,17 +242,17 @@ public class NextBus implements EntryPoint {
 
 			String foot = "			</tbody>\r\n" + 
 					"			</table>\r\n";
-			
+
 			final HTML busRouteTable = new HTML(head+content+foot);
-			
+
 			busEstimatesMap.put(busRouteNum, busRouteTable);
 		}
 
 	}
-	
+
 	private void AddBusStopNumField(int stopNum, RootPanel busStopNumFieldPanel)
 	{
-/*		String busStopNumFormat = "<div class=\"row\">\r\n" + 
+		/*		String busStopNumFormat = "<div class=\"row\">\r\n" + 
 								  "<h3>Stop Num: " +
 								  "<input width=\"75px\" type=\"number\" placeholder=\"Stop Number\" value=\"" +
 								  stopNum + 
@@ -256,9 +260,9 @@ public class NextBus implements EntryPoint {
 								  "<button type=\"button\" class=\"btn btn-info\">Refresh</button>\r\n" +
 								  "</h3>\r\n" +
 								  "</div>\r\n";
-*/
+		 */
 		busStopNumFieldPanel.clear();
-		
+
 		final HTML stopNumLabel = new HTML("<h3>Stop Num: </h3>");
 		busStopNumFieldPanel.add(stopNumLabel);		
 
@@ -266,48 +270,83 @@ public class NextBus implements EntryPoint {
 		stopNumInput.getElement().setClassName("form-control");
 		stopNumInput.getElement().setAttribute("type", "number");
 		stopNumInput.setText(stopNum + "");
-		
+
 		stopNumInput.addKeyUpHandler(new BusStopNumberEventHandler());
-		
+
 		busStopNumFieldPanel.add(stopNumInput);		
-		
+
 		final Button searchButton = new Button("Search");
 		searchButton.getElement().setClassName("btn btn-info btn-lg");
-		
+
 		searchButton.addClickHandler(new BusStopNumberEventHandler());
-		
+
 		busStopNumFieldPanel.add(searchButton);		
 	}
-	
-	public static void AddBusRouteNumField(List<BusData> dataList, RootPanel routeNumFieldPanel)
+
+	public void AddBusRouteNumField(List<BusData> dataList, RootPanel routeNumFieldPanel)
 	{
 		routeNumFieldPanel.clear();
+		_busRouteNumButtons.clear();
 
-//		NumberFormat fmt = NumberFormat.getFormat("000");
+		boolean isFirstButtonActive = false;
+
+		//		NumberFormat fmt = NumberFormat.getFormat("000");
 		for(BusData data : dataList)
 		{
 			String routeNum = data.GetRouteNum();
-			Button stopButton = new Button (routeNum);
-			stopButton.getElement().setClassName("btn btn-lg btn-primary");
-					
-			routeNumFieldPanel.add(stopButton);
+			Button routeNumberButton = new Button (routeNum);
+			_busRouteNumButtons.add(routeNumberButton);
+			if(!isFirstButtonActive)
+			{
+				routeNumberButton.getElement().setClassName("btn btn-lg btn-primary active");
+				isFirstButtonActive = true;
+			}
+			else
+			{
+				routeNumberButton.getElement().setClassName("btn btn-lg btn-primary");
+			}
+
+			routeNumberButton.addClickHandler(new BusRouteNumberClickHandler());
+
+			routeNumFieldPanel.add(routeNumberButton);
 
 		}
 	}
-	
+
+	class BusRouteNumberClickHandler implements ClickHandler {
+
+		public void onClick(ClickEvent event) 
+		{
+
+			for(Button b : _busRouteNumButtons)
+			{
+				b.getElement().setClassName("btn btn-lg btn-primary");
+			}
+
+			Button button = (Button)event.getSource();
+
+			final RootPanel busEstimatesFieldPanel = RootPanel.get("busEstimatesField");
+
+			busEstimatesFieldPanel.clear();
+
+			button.getElement().setClassName("btn btn-lg btn-primary active");
+			busEstimatesFieldPanel.add(busEstimatesMap.get(button.getText()));
+		}
+	}
+
 	class BusStopNumberEventHandler implements ClickHandler, KeyUpHandler {
 
 		public void onClick(ClickEvent event) 
 		{
 			queryStopNumToServer();
 		}
-		
+
 		public void onKeyUp(KeyUpEvent event) {
 			if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
 				queryStopNumToServer();
 			}
 		}
-		
+
 		protected void queryStopNumToServer()
 		{
 			String busStopNum = stopNumInput.getText();
