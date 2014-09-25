@@ -220,6 +220,22 @@ public class NextBus implements EntryPoint {
 		busStopNumFieldPanel.add(searchButton);		
 	}
 	
+	public static void AddBusRouteNumField(List<BusData> dataList, RootPanel routeNumFieldPanel)
+	{
+		routeNumFieldPanel.clear();
+
+//		NumberFormat fmt = NumberFormat.getFormat("000");
+		for(BusData data : dataList)
+		{
+			String routeNum = data.GetRouteNum();
+			Button stopButton = new Button (routeNum);
+			stopButton.getElement().setClassName("btn btn-lg btn-primary");
+					
+			routeNumFieldPanel.add(stopButton);
+
+		}
+	}
+	
 	class BusStopNumberEventHandler implements ClickHandler, KeyUpHandler {
 
 		public void onClick(ClickEvent event) 
