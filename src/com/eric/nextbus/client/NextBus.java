@@ -1,9 +1,12 @@
 package com.eric.nextbus.client;
 
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
+import java.util.TreeMap;
 
 import com.eric.nextbus.shared.BusData;
+import com.eric.nextbus.shared.BusData.Status;
 import com.eric.nextbus.shared.FieldVerifier;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -46,20 +49,16 @@ public class NextBus implements EntryPoint {
 
 	final TextBox stopNumInput = new TextBox();
 	
+	final Map<String, HTML> busEstimatesMap = new TreeMap<String, HTML>();
+	
 	/**
 	 * This is the entry point method.
 	 */
 	public void onModuleLoad() {
-//		final Button sendButton = new Button("Query");
-//		final TextBox nameField = new TextBox();
-//		nameField.getElement().setAttribute("placeholder", "Enter Bus Stop Number");
 		_stopNo = Window.Location.getParameter("stopnum");
 
-//		final Label errorLabel = new Label();
-//		final HTML nextBusLabel = new HTML();
 		final HTML busRouteNumField = new HTML();
 		final HTML busStopNumField = new HTML();
-		final HTML busEstimatesField = new HTML();
 		
 		// We can add style names to widgets
 //		sendButton.addStyleName("sendButton");
@@ -72,7 +71,7 @@ public class NextBus implements EntryPoint {
 //		RootPanel.get("nextBusLabelContainer").add(nextBusLabel);
 		RootPanel.get("busRouteNumField").add(busRouteNumField);
 		RootPanel.get("busStopNumField").add(busStopNumField);
-		RootPanel.get("busEstimatesField").add(busEstimatesField);
+		final RootPanel busEstimatesFieldPanel = RootPanel.get("busEstimatesField");
 		
 /*		busRouteNumField.setHTML("<div class=\"row\">\r\n" + 
 				"				<button type=\"button\" class=\"btn btn-lg btn-primary active\">099</button>\r\n" + 
@@ -132,8 +131,6 @@ public class NextBus implements EntryPoint {
 		closeButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				dialogBox.hide();
-//				sendButton.setEnabled(true);
-//				sendButton.setFocus(true);
 			}
 		});
 
@@ -147,20 +144,10 @@ public class NextBus implements EntryPoint {
 				serverResponseLabel.setHTML(SERVER_ERROR);
 				dialogBox.center();
 				closeButton.setFocus(true);
-//				sendButton.setEnabled(true);
 			}
 
 			public void onSuccess(List<BusData> result) {
-//				dialogBox.setText("Remote Procedure Call");
-//				serverResponseLabel
-//						.removeStyleName("serverResponseLabelError");
-//				serverResponseLabel.setHTML(result);
-//				dialogBox.center();
-//				closeButton.setFocus(true);
-//				System.out.println(result);
-//				String resultHTML = StringEscapeUtils.escapeHtml4(result);
-//				nextBusLabel.setHTML(result);
-				//nextBusLabel;
+
 				if(result.size()==0)
 				{
 					busRouteNumField.setHTML(FieldAdder.NoBusMessage());
@@ -169,22 +156,94 @@ public class NextBus implements EntryPoint {
 				
 				FieldAdder.AddBusRouteNumField(result, RootPanel.get("busRouteNumField"));
 				AddBusStopNumField(result.get(0).GetStopNum(), RootPanel.get("busStopNumField"));
-				busEstimatesField.setHTML(FieldAdder.AddBusEstimatesField(result));
-				System.out.println("succed done");
-//				sendButton.setEnabled(true);
+
+				InitBusEstimatesMap(result);
+				busEstimatesFieldPanel.clear();
+				busEstimatesFieldPanel.add(busEstimatesMap.get("049"));
+				
+
+				System.out.println("succeed");
 			}
 		};
 		System.out.println(_stopNo);
 		if(_stopNo != null && FieldVerifier.tryParseInt(_stopNo))
 		{
-//			nameField.setText(routeNo);
 			greetingService.greetServer(_stopNo, nextBusService);
 		}
+	}
+	
+	public String AddBusEstimatesField(List<BusData> dataList)
+	{
 
-		// Add a handler to send the name to the server
-//		MyHandler handler = new MyHandler();
-//		sendButton.addClickHandler(handler);
-//		nameField.addKeyUpHandler(handler);
+		String head = "<table class=\"table table-striped\">\r\n" + 
+				"				<thead>\r\n" + 
+				"					<th>Estimates</th>\r\n" + 
+				"					<th>Status</th>\r\n" + 
+				"				</thead>\r\n" + 
+				"				<tbody>\r\n";
+		
+		String content = "";
+		for(BusData data : dataList)
+		{
+			SortedMap<Integer, Status> estimates = data.GetEstimates();
+			for(int key : estimates.keySet())
+			{
+				BusData.Status status = estimates.get(key);
+				content += "<tr>\r\n" + 
+						"						<td>" + 
+						key +
+						" min</td>\r\n" + 
+						"						<td>" +
+						status.toString() +
+						"</td>\r\n" + 
+						"					</tr>\r\n";
+			}
+			
+		}
+		
+		String foot = "			</tbody>\r\n" + 
+				"			</table>\r\n";
+		
+		return head+content+foot;
+	}
+	
+	private void InitBusEstimatesMap(List<BusData> dataList)
+	{
+		for(BusData data : dataList)
+		{
+			String busRouteNum = data.GetRouteNum();
+			
+			String head = "<table class=\"table table-striped\">\r\n" + 
+					"				<thead>\r\n" + 
+					"					<th>Estimates</th>\r\n" + 
+					"					<th>Status</th>\r\n" + 
+					"				</thead>\r\n" + 
+					"				<tbody>\r\n";
+
+			String content = "";
+
+			SortedMap<Integer, Status> estimates = data.GetEstimates();
+			for(int key : estimates.keySet())
+			{
+				BusData.Status status = estimates.get(key);
+				content += "<tr>\r\n" + 
+						"						<td>" + 
+						key +
+						" min</td>\r\n" + 
+						"						<td>" +
+						status.toString() +
+						"</td>\r\n" + 
+						"					</tr>\r\n";
+			}
+
+			String foot = "			</tbody>\r\n" + 
+					"			</table>\r\n";
+			
+			final HTML busRouteTable = new HTML(head+content+foot);
+			
+			busEstimatesMap.put(busRouteNum, busRouteTable);
+		}
+
 	}
 	
 	private void AddBusStopNumField(int stopNum, RootPanel busStopNumFieldPanel)
