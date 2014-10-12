@@ -11,11 +11,14 @@ import com.eric.nextbus.shared.BusData.Status;
 import com.eric.nextbus.shared.FieldVerifier;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -39,27 +42,30 @@ public class NextBus implements EntryPoint {
 			+ "attempting to contact the server. Please check your network "
 			+ "connection and try again.";
 
-	private String _stopNo;
+	private String _stopNum;
 
 	/**
 	 * Create a remote service proxy to talk to the server-side Greeting service.
 	 */
-	private final GreetingServiceAsync greetingService = GWT
-			.create(GreetingService.class);
+	private final GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
 
 	public AsyncCallback<List<BusData>> nextBusService;
 
-	final TextBox stopNumInput = new TextBox();
+	private final TextBox _stopNumInput = new TextBox();
 
-	final Map<String, HTML> busEstimatesMap = new TreeMap<String, HTML>();
-
-	final private List<Button> _busRouteNumButtons = new ArrayList<Button>();
+	private final Map<String, HTML> _busEstimatesMap = new TreeMap<String, HTML>();
+	private final List<Button> _busRouteNumButtons = new ArrayList<Button>();
+	
+	private final Button refreshBtn = Button.wrap(Document.get().getElementById("refreshBtn"));
+	
+	private final String LOADING_GIF_DIV_ID = "loadingGif";
 
 	/**
 	 * This is the entry point method.
 	 */
 	public void onModuleLoad() {
-		_stopNo = Window.Location.getParameter("stopnum");
+		ChangeLoadingGifVisibility(false);
+		_stopNum = Window.Location.getParameter("stopnum");
 
 		final HTML busRouteNumField = new HTML();
 		final HTML busStopNumField = new HTML();
@@ -107,10 +113,6 @@ public class NextBus implements EntryPoint {
 				"				</tbody>\r\n" + 
 				"			</table>");*/
 
-		// Focus the cursor on the name field when the app loads
-		//		nameField.setFocus(true);
-		//		nameField.selectAll();
-
 		// Create the popup dialog box
 		final DialogBox dialogBox = new DialogBox();
 		dialogBox.setText("Remote Procedure Call");
@@ -139,84 +141,75 @@ public class NextBus implements EntryPoint {
 
 		nextBusService = new AsyncCallback<List<BusData>>(){
 			public void onFailure(Throwable caught) {
-				// Show the RPC error message to the user
-				dialogBox
-				.setText("Remote Procedure Call - Failure");
-				serverResponseLabel
-				.addStyleName("serverResponseLabelError");
-				serverResponseLabel.setHTML(SERVER_ERROR);
-				dialogBox.center();
-				closeButton.setFocus(true);
+				try
+				{
+					// Show the RPC error message to the user
+					dialogBox.setText("Remote Procedure Call - Failure");
+					serverResponseLabel
+					.addStyleName("serverResponseLabelError");
+					serverResponseLabel.setHTML(SERVER_ERROR);
+					dialogBox.center();
+					closeButton.setFocus(true);
+				}
+				catch(Exception e)
+				{
+					ChangeLoadingGifVisibility(false);
+					throw(e);
+				}
+				
 			}
 
 			public void onSuccess(List<BusData> result) {
-
-				if(result.size()==0)
+				try
 				{
-					busRouteNumField.setHTML(FieldAdder.NoBusMessage());
-					return;
+					if(result.size()==0)
+					{
+						busRouteNumField.setHTML(FieldAdder.NoBusMessage());
+						return;
+					}
+	
+					AddBusRouteNumField(result, RootPanel.get("busRouteNumField"));
+					AddBusStopNumField(result.get(0).GetStopNum(), RootPanel.get("busStopNumField"));
+	
+					InitBusEstimatesMap(result);
+	
+					final RootPanel busEstimatesFieldPanel = RootPanel.get("busEstimatesField");
+					busEstimatesFieldPanel.clear();
+					busEstimatesFieldPanel.add((Widget) _busEstimatesMap.values().toArray()[0]);
+					
+					ChangeLoadingGifVisibility(false);
+	
+					System.out.println("succeed");
 				}
-
-				AddBusRouteNumField(result, RootPanel.get("busRouteNumField"));
-				AddBusStopNumField(result.get(0).GetStopNum(), RootPanel.get("busStopNumField"));
-
-				InitBusEstimatesMap(result);
-
-				final RootPanel busEstimatesFieldPanel = RootPanel.get("busEstimatesField");
-				busEstimatesFieldPanel.clear();
-				busEstimatesFieldPanel.add((Widget) busEstimatesMap.values().toArray()[0]);
-
-				System.out.println("succeed");
+				catch(Exception e)
+				{
+					ChangeLoadingGifVisibility(false);
+					throw(e);
+				}
 			}
 		};
-		System.out.println(_stopNo);
-		if(_stopNo != null && FieldVerifier.tryParseInt(_stopNo))
+		System.out.println(_stopNum);
+		if(_stopNum != null && FieldVerifier.tryParseInt(_stopNum))
 		{
-			greetingService.greetServer(_stopNo, nextBusService);
+			SearchStopNum(_stopNum);
 		}
-	}
-
-	public String AddBusEstimatesField(List<BusData> dataList)
-	{
-
-		String head = "<table class=\"table table-striped\">\r\n" + 
-				"				<thead>\r\n" + 
-				"					<th>Estimates</th>\r\n" + 
-				"					<th>Status</th>\r\n" + 
-				"				</thead>\r\n" + 
-				"				<tbody>\r\n";
-
-		String content = "";
-		for(BusData data : dataList)
+		else
 		{
-			SortedMap<Integer, Status> estimates = data.GetEstimates();
-			for(int key : estimates.keySet())
-			{
-				BusData.Status status = estimates.get(key);
-				content += "<tr>\r\n" + 
-						"						<td>" + 
-						key +
-						" min</td>\r\n" + 
-						"						<td>" +
-						status.toString() +
-						"</td>\r\n" + 
-						"					</tr>\r\n";
-			}
-
+			AddBusStopNumField(0, RootPanel.get("busStopNumField"));
 		}
-
-		String foot = "			</tbody>\r\n" + 
-				"			</table>\r\n";
-
-		return head+content+foot;
+		
+		refreshBtn.addClickHandler(new RefreshClickHandler());
+		
+		
+		
 	}
 
 	private void InitBusEstimatesMap(List<BusData> dataList)
 	{
+		_busEstimatesMap.clear();
+		
 		for(BusData data : dataList)
 		{
-			String busRouteNum = data.GetRouteNum();
-
 			String head = "<table class=\"table table-striped\">\r\n" + 
 					"				<thead>\r\n" + 
 					"					<th>Estimates</th>\r\n" + 
@@ -234,9 +227,7 @@ public class NextBus implements EntryPoint {
 						"						<td>" + 
 						key +
 						" min</td>\r\n" + 
-						"						<td>" +
-						status.toString() +
-						"</td>\r\n" + 
+						FormatStatusTableData(status) + 
 						"					</tr>\r\n";
 			}
 
@@ -245,9 +236,34 @@ public class NextBus implements EntryPoint {
 
 			final HTML busRouteTable = new HTML(head+content+foot);
 
-			busEstimatesMap.put(busRouteNum, busRouteTable);
-		}
+			String busRouteNum = data.GetRouteNum();
 
+			_busEstimatesMap.put(busRouteNum, busRouteTable);
+		}
+	}
+	
+	private String FormatStatusTableData(BusData.Status status)
+	{
+		String tdStatus = "<td";
+		switch(status)
+		{
+			case NONE:
+				tdStatus += ">";
+				break;
+			case AHEAD:
+				tdStatus += " class=\"orangeColor\">";
+				break;
+			case DELAYED:
+				tdStatus += " class=\"redColor\">";
+				break;
+			case ONTIME:
+				tdStatus += " class=\"greenColor\">";
+				break;
+		}
+		tdStatus +=status.toString() + "</td>\r\n";
+		
+		System.out.println(tdStatus);
+		return tdStatus;
 	}
 
 	private void AddBusStopNumField(int stopNum, RootPanel busStopNumFieldPanel)
@@ -266,14 +282,21 @@ public class NextBus implements EntryPoint {
 		final HTML stopNumLabel = new HTML("<h3>Stop Num: </h3>");
 		busStopNumFieldPanel.add(stopNumLabel);		
 
-		stopNumInput.getElement().setAttribute("placeHolder","Stop Number");
-		stopNumInput.getElement().setClassName("form-control");
-		stopNumInput.getElement().setAttribute("type", "number");
-		stopNumInput.setText(stopNum + "");
+		_stopNumInput.getElement().setAttribute("placeHolder","Stop Number");
+		_stopNumInput.getElement().setClassName("form-control");
+		_stopNumInput.getElement().setAttribute("type", "number");
+		if(stopNum==0)
+		{
+			_stopNumInput.setText("");
+		}
+		else
+		{
+			_stopNumInput.setText(stopNum + "");
+		}
 
-		stopNumInput.addKeyUpHandler(new BusStopNumberEventHandler());
+		_stopNumInput.addKeyUpHandler(new BusStopNumberEventHandler());
 
-		busStopNumFieldPanel.add(stopNumInput);		
+		busStopNumFieldPanel.add(_stopNumInput);		
 
 		final Button searchButton = new Button("Search");
 		searchButton.getElement().setClassName("btn btn-info btn-lg");
@@ -309,15 +332,23 @@ public class NextBus implements EntryPoint {
 			routeNumberButton.addClickHandler(new BusRouteNumberClickHandler());
 
 			routeNumFieldPanel.add(routeNumberButton);
-
 		}
+	}
+	
+	
+
+	public void ChangeLoadingGifVisibility(boolean isVisible)
+	{
+		if(isVisible)
+			DOM.getElementById(LOADING_GIF_DIV_ID).getStyle().setDisplay(Display.INLINE);
+		else
+			DOM.getElementById(LOADING_GIF_DIV_ID).getStyle().setDisplay(Display.NONE);
 	}
 
 	class BusRouteNumberClickHandler implements ClickHandler {
 
 		public void onClick(ClickEvent event) 
 		{
-
 			for(Button b : _busRouteNumButtons)
 			{
 				b.getElement().setClassName("btn btn-lg btn-primary");
@@ -330,7 +361,7 @@ public class NextBus implements EntryPoint {
 			busEstimatesFieldPanel.clear();
 
 			button.getElement().setClassName("btn btn-lg btn-primary active");
-			busEstimatesFieldPanel.add(busEstimatesMap.get(button.getText()));
+			busEstimatesFieldPanel.add(_busEstimatesMap.get(button.getText()));
 		}
 	}
 
@@ -349,12 +380,34 @@ public class NextBus implements EntryPoint {
 
 		protected void queryStopNumToServer()
 		{
-			String busStopNum = stopNumInput.getText();
-			if(FieldVerifier.isValidStopNum(busStopNum))
+			_stopNum = _stopNumInput.getText();
+			if(FieldVerifier.isValidStopNum(_stopNum))
 			{
-				greetingService.greetServer(busStopNum, nextBusService);
+				SearchStopNum(_stopNum);
 			}
 		}
 
+	}
+	
+	class RefreshClickHandler implements ClickHandler {
+
+		public void onClick(ClickEvent event) 
+		{
+			queryStopNumToServer();
+		}
+		
+		protected void queryStopNumToServer()
+		{
+			if(FieldVerifier.isValidStopNum(_stopNum))
+			{
+				SearchStopNum(_stopNum);
+			}
+		}
+	}
+	
+	private void SearchStopNum(String stopNum)
+	{
+		ChangeLoadingGifVisibility(true);
+		greetingService.greetServer(stopNum, nextBusService);
 	}
 }

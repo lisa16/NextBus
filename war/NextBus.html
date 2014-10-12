@@ -12,8 +12,8 @@
 <!--                                                               -->
 <!-- Consider inlining CSS to reduce the number of requested files -->
 <!--                                                               -->
-<!-- <link type="text/css" rel="stylesheet" href="NextBus.css"> -->
-<link type="text/css" rel="stylesheet" href="css/bootstrap.css">
+<link type="text/css" rel="stylesheet" href="css/bootstrap.min.css">
+<link type="text/css" rel="stylesheet" href="css/NextBus.css">
 
 <!--                                           -->
 <!-- Any title is fine                         -->
@@ -30,7 +30,7 @@
 <script type="text/javascript" language="javascript"
 	src="js/jquery-2.1.1.min.js"></script>
 <script type="text/javascript" language="javascript"
-	src="js/bootstrap.js"></script>
+	src="js/bootstrap.min.js"></script>
 
 </head>
 
@@ -57,6 +57,10 @@
 		<div id="busStopNumField">
 			<!-- <h3>Bus Stop Num: 59270</h3> -->
 		</div>
+		
+		<div id="loadingGif">
+			<img src="img/loading2.gif" >
+		</div>
 
 		<div id="busRouteNumField">
 			<!--  Bus Route Number Field -->
@@ -82,21 +86,21 @@
 				<tbody>
 					<tr>
 						<td>0 min</td>
-						<td>On Time</td>
+						<td class="greenColor">On Time</td>
 					</tr>
 					<tr>
 						<td>5 min</td>
-						<td>Delayed</td>
+						<td class="redColor">Delayed</td>
 					</tr>
 					<tr>
 						<td>10 min</td>
-						<td>Ahead</td>
+						<td class="orangeColor">Ahead</td>
 					</tr>
 				</tbody>
 			</table> -->
 		</div>
-		<button type="button" class="btn btn-info">Refresh</button>
-		<button type="button" class="btn btn-default">Contact Us</button>
+		<button type="button" id="refreshBtn" class="btn btn-info">Refresh</button>
+		<button type="button" id="contactUsBtn" class="btn btn-default">Contact Us</button>
 		<!-- <table align="center">
       <tr>
         <td colspan="2" style="color:red;" id="errorLabelContainer"></td>

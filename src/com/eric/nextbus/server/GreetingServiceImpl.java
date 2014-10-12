@@ -7,6 +7,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+
+import javax.mail.Message;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 import com.eric.nextbus.client.GreetingService;
 import com.eric.nextbus.shared.BusData;
@@ -156,4 +163,25 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 		return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;")
 				.replaceAll(">", "&gt;");
 	}
+	
+	public String SendMail(String from, String to, String replyTo, String subject, String message)  throws IllegalArgumentException {
+        String output=null;
+        Properties props = new Properties();
+        Session session = Session.getDefaultInstance(props, null);
+
+        try {
+            Message msg = new MimeMessage(session);
+            msg.setFrom(new InternetAddress(from, "Contact Us User"));
+            msg.addRecipient(Message.RecipientType.TO,
+                             new InternetAddress(to, "TransLinkBus Admin"));
+            msg.setSubject(subject);
+            msg.setText(message);
+            msg.setReplyTo(new InternetAddress[]{new InternetAddress(replyTo)});
+            Transport.send(msg);
+
+        } catch (Exception e) {
+            output=e.toString();                
+        }   
+        return output;
+    }
 }
